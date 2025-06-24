@@ -131,8 +131,8 @@ def uniformCostSearch(problem: SearchProblem):
         if cur_state not in visited :
             visited.add(cur_state)
             for successor, action, step_cost in problem.getSuccessors(cur_state) :
-                next_costs = costs + step_cost
-                priority_queue.push((successor, actions + [action], next_costs), next_costs)
+                next_cost = costs + step_cost
+                priority_queue.push((successor, actions + [action], next_cost), next_cost)
     return []
 
 def nullHeuristic(state, problem=None):
@@ -145,7 +145,20 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    priority_queue = util.PriorityQueue()
+    visited = set()
+    priority_queue.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem))
+
+    while not priority_queue.isEmpty() :
+        cur_state, actions, costs = priority_queue.pop()
+        if problem.isGoalState(cur_state) :
+            return actions
+        if cur_state not in visited :
+            visited.add(cur_state)
+            for successor, action, step_cost in problem.getSuccessors(cur_state) :
+                next_cost = costs + step_cost
+                priority_queue.push((successor, actions + [action], next_cost), next_cost + heuristic(successor, problem))
+    return []
 
 
 # Abbreviations
