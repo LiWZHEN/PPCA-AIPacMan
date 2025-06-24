@@ -114,8 +114,7 @@ python autograder.py -q q3
 
 ```
 python pacman.py -l bigMaze -z .5 -p SearchAgent -a fn=astar,heuristic=manhattanHeuristic
-python pacman.py -l openMaze -z .5 -p SearchAgent -a fn=astar,heuristic=m
-anhattanHeuristic
+python pacman.py -l openMaze -z .5 -p SearchAgent -a fn=astar,heuristic=manhattanHeuristic
 ```
 
 你应该看到 A* 找到最佳解决方案的速度比统一成本搜索略快。
