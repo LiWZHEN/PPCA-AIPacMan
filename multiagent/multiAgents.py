@@ -275,7 +275,49 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def ExpectiMax(node, depth, agent_index):
+            if depth == 0 or node.isWin() or node.isLose():
+                return self.evaluationFunction(node)
+
+            agent_num = node.getNumAgents()
+            legal_actions = node.getLegalActions(agent_index)
+
+            if not legal_actions:
+                return self.evaluationFunction(node)
+
+            if agent_index == 0:
+                maxEval = -1e9
+                for action in legal_actions:
+                    successor = node.generateSuccessor(0, action)
+                    evaluation = ExpectiMax(successor, depth, 1)
+                    maxEval = max(maxEval, evaluation)
+                return maxEval
+            else:
+                successor_num = 0
+                evaluation_sum = 0
+                if agent_index == agent_num - 1:
+                    for action in legal_actions:
+                        successor = node.generateSuccessor(agent_index, action)
+                        evaluation_sum += ExpectiMax(successor, depth - 1, 0)
+                        successor_num += 1
+                else:
+                    for action in legal_actions:
+                        successor = node.generateSuccessor(agent_index, action)
+                        evaluation_sum += ExpectiMax(successor, depth, agent_index + 1)
+                        successor_num += 1
+                return evaluation_sum / successor_num
+
+        legalActions = gameState.getLegalActions(0)
+        bestAction = Directions.STOP
+        bestValue = -1e9
+
+        for action in legalActions:
+            successor = gameState.generateSuccessor(0, action)
+            value = ExpectiMax(successor, self.depth, 1)
+            if value > bestValue:
+                bestValue = value
+                bestAction = action
+        return bestAction
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
