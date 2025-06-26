@@ -324,10 +324,48 @@ def betterEvaluationFunction(currentGameState: GameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: This function considers the following factors:
+        1. the distance to the closest food
+        2. the distance to each ghost (scared or not)
+        3. the distance to the closest capsule
+        4. the remained food
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    food_list = currentGameState.getFood().asList()
+    food_num = currentGameState.getNumFood()
+    ghost_state_list = currentGameState.getGhostStates()
+    capsule_list = currentGameState.getCapsules()
+    scared_times = [ghost_state.scaredTimer for ghost_state in ghost_state_list]
+    pacman_pos = currentGameState.getPacmanPosition()
+    score = currentGameState.getScore()
+
+    score -= food_num * 5
+
+    food_closest = 1e9
+    for food in food_list:
+        distance = manhattanDistance(pacman_pos, food)
+        if distance < food_closest:
+            food_closest = distance
+    score += 2 / food_closest
+
+    capsule_closest = 1e9
+    for capsule in capsule_list:
+        distance = manhattanDistance(pacman_pos, capsule)
+        if distance < capsule_closest:
+            capsule_closest = distance
+    score += 15 / capsule_closest
+
+    for index, ghost in enumerate(ghost_state_list):
+        distance = manhattanDistance(ghost.getPosition(), pacman_pos)
+        if scared_times[index] > 0:
+            if distance <= scared_times[index]:
+                score += 100 / distance
+        else:
+            if distance <= 1:
+                score -= 200
+            else:
+                score -= 2 / distance
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
