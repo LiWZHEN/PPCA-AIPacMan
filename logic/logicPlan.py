@@ -497,9 +497,26 @@ def mapping(problem, agent) -> Generator:
     KB.append(conjoin(outer_wall_sent))
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    KB.append(PropSymbolExpr(pacman_str, pac_x_0, pac_y_0, time = 0))
+    KB.append(~PropSymbolExpr(wall_str, pac_x_0, pac_y_0))
+    known_map[pac_x_0][pac_y_0] = 0
 
     for t in range(agent.num_timesteps):
+        action_t = agent.actions[t]
+        KB.append(pacphysicsAxioms(t, all_coords, non_outer_wall_coords, known_map, sensorAxioms, allLegalSuccessorAxioms))
+        KB.append(PropSymbolExpr(action_t, time=t))
+        KB.append(fourBitPerceptRules(t, agent.getPercepts()))
+        for x, y in non_outer_wall_coords:
+            wall_xy = PropSymbolExpr(wall_str, x, y)
+            has_wall_at_xy = entails(conjoin(KB), wall_xy)
+            not_has_wall_at_xy = entails(conjoin(KB), ~wall_xy)
+            if has_wall_at_xy:
+                known_map[x][y] = 1
+                KB.append(wall_xy)
+            if not_has_wall_at_xy:
+                known_map[x][y] = 0
+                KB.append(~wall_xy)
+        agent.moveToNextState(action_t)
         "*** END YOUR CODE HERE ***"
         yield known_map
 
