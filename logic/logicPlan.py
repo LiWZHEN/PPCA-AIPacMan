@@ -445,10 +445,30 @@ def localization(problem, agent) -> Generator:
     KB = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    for x, y in all_coords:
+        if (x, y) in walls_list:
+            KB.append(PropSymbolExpr(wall_str, x, y))
+        else:
+            KB.append(~PropSymbolExpr(wall_str, x, y))
 
     for t in range(agent.num_timesteps):
         "*** END YOUR CODE HERE ***"
+        action_t = agent.actions[t]
+        KB.append(pacphysicsAxioms(t, all_coords, non_outer_wall_coords, walls_grid, sensorAxioms, allLegalSuccessorAxioms))
+        KB.append(PropSymbolExpr(action_t, time = t))
+        KB.append(fourBitPerceptRules(t, agent.getPercepts()))
+        possible_locations = []
+        for x, y in non_outer_wall_coords:
+            pacman_xy_t = PropSymbolExpr(pacman_str, x, y, time = t)
+            pacman_at_xy = entails(conjoin(KB), pacman_xy_t)
+            pacman_not_at_xy = entails(conjoin(KB), ~pacman_xy_t)
+            if pacman_not_at_xy:
+                KB.append(~pacman_xy_t)
+            else:
+                possible_locations.append((x, y))
+            if pacman_at_xy:
+                KB.append(pacman_xy_t)
+        agent.moveToNextState(action_t)
         yield possible_locations
 
 #______________________________________________________________________________
