@@ -43,7 +43,7 @@ def joinFactorsByVariableWithCallTracking(callTrackingList=None):
         # typecheck portion
         numVariableOnLeft = len([factor for factor in currentFactorsToJoin if joinVariable in factor.unconditionedVariables()])
         if numVariableOnLeft > 1:
-            print("Factor failed joinFactorsByVariable typecheck: ", factor)
+            print("Factor failed joinFactorsByVariable typecheck: ", factors)
             raise ValueError("The joinBy variable can only appear in one factor as an \nunconditioned variable. \n" +  
                                "joinVariable: " + str(joinVariable) + "\n" +
                                ", ".join(map(str, [factor.unconditionedVariables() for factor in currentFactorsToJoin])))
@@ -93,7 +93,7 @@ def joinFactors(factors: List[Factor]):
     if len(factors) > 1:
         intersect = functools.reduce(lambda x, y: x & y, setsOfUnconditioned)
         if len(intersect) > 0:
-            print("Factor failed joinFactors typecheck: ", factor)
+            print("Factor failed joinFactors typecheck: ", factors)
             raise ValueError("unconditionedVariables can only appear in one factor. \n"
                     + "unconditionedVariables: " + str(intersect) + 
                     "\nappear in more than one input factor.\n" + 
@@ -102,8 +102,30 @@ def joinFactors(factors: List[Factor]):
 
 
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    new_conditioned_variables = []
+    new_unconditioned_variables = []
+    new_variableDomainsDict = {}
+    for factor in factors:
+        for unconditioned_variable in factor.unconditionedVariables():
+            if unconditioned_variable not in new_unconditioned_variables:
+                new_unconditioned_variables.append(unconditioned_variable)
+            if unconditioned_variable not in new_variableDomainsDict:
+                new_variableDomainsDict[unconditioned_variable] = factor.variableDomainsDict()[unconditioned_variable]
+    for factor in factors:
+        for conditioned_variable in factor.conditionedVariables():
+            if conditioned_variable not in new_conditioned_variables and conditioned_variable not in new_unconditioned_variables:
+                new_conditioned_variables.append(conditioned_variable)
+            if conditioned_variable not in new_variableDomainsDict:
+                new_variableDomainsDict[conditioned_variable] = factor.variableDomainsDict()[conditioned_variable]
+
+    new_factor = Factor(new_unconditioned_variables, new_conditioned_variables, new_variableDomainsDict)
+    for PossibleAssignmentDict in new_factor.getAllPossibleAssignmentDicts():
+        probability = 1
+        for factor in factors:
+            probability *= factor.getProbability(PossibleAssignmentDict)
+        new_factor.setProbability(PossibleAssignmentDict, probability)
+    return new_factor
+    # "*** END YOUR CODE HERE ***"
 
 ########### ########### ###########
 ########### QUESTION 3  ###########
