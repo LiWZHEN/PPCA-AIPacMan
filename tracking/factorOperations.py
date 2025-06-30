@@ -175,8 +175,35 @@ def eliminateWithCallTracking(callTrackingList=None):
                     "unconditionedVariables: " + str(factor.unconditionedVariables()))
 
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
-        "*** END YOUR CODE HERE ***"
+        new_conditioned_variables = []
+        new_unconditioned_variables = []
+        new_variableDomainsDict = {}
+        for conditioned_variable in factor.conditionedVariables():
+            if conditioned_variable == eliminationVariable:
+                continue
+            new_conditioned_variables.append(conditioned_variable)
+            new_variableDomainsDict[conditioned_variable] = factor.variableDomainsDict()[conditioned_variable]
+        for unconditioned_variable in factor.unconditionedVariables():
+            if unconditioned_variable == eliminationVariable:
+                continue
+            new_unconditioned_variables.append(unconditioned_variable)
+            new_variableDomainsDict[unconditioned_variable] = factor.variableDomainsDict()[unconditioned_variable]
+        new_factor = Factor(new_unconditioned_variables, new_conditioned_variables, new_variableDomainsDict)
+        for new_PossibleAssignmentDict in new_factor.getAllPossibleAssignmentDicts():
+            probability = 0
+            for PossibleAssignmentDict in factor.getAllPossibleAssignmentDicts():
+                flag = True
+                for item in new_PossibleAssignmentDict:
+                    if item == eliminationVariable:
+                        continue
+                    if new_PossibleAssignmentDict[item] != PossibleAssignmentDict[item]:
+                        flag = False
+                        break
+                if flag:
+                    probability += factor.getProbability(PossibleAssignmentDict)
+            new_factor.setProbability(new_PossibleAssignmentDict, probability)
+        return new_factor
+        # "*** END YOUR CODE HERE ***"
 
     return eliminate
 
