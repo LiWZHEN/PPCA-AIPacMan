@@ -345,7 +345,10 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        total_sum = self.total()
+        if total_sum != 0:
+            for key in self.keys():
+                self[key] /= total_sum
         "*** END YOUR CODE HERE ***"
 
     def sample(self):
@@ -370,8 +373,17 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
-        "*** END YOUR CODE HERE ***"
+        total_sum = self.total()
+        if total_sum != 0:
+            random_value = random.random()
+            random_value *= total_sum
+            add_up = 0
+            for key, value in self.items():
+                add_up += value
+                if add_up > random_value:
+                    return key
+        return None
+        # "*** END YOUR CODE HERE ***"
 
 
 class InferenceModule:
