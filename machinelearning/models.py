@@ -180,7 +180,10 @@ class DigitClassificationModel(Module):
         input_size = 28 * 28
         output_size = 10
         "*** YOUR CODE HERE ***"
-
+        hidden_size = 128
+        self.fc1 = Linear(input_size, hidden_size)
+        self.fc2 = Linear(hidden_size, output_size)
+        self.relu = relu
 
 
     def run(self, x):
@@ -198,6 +201,8 @@ class DigitClassificationModel(Module):
                 (also called logits)
         """
         """ YOUR CODE HERE """
+        hidden = self.relu(self.fc1(x))
+        return self.fc2(hidden)
 
 
     def get_loss(self, x, y):
@@ -214,7 +219,8 @@ class DigitClassificationModel(Module):
         Returns: a loss tensor
         """
         """ YOUR CODE HERE """
-
+        predict = self.run(x)
+        return cross_entropy(predict, y)
         
 
     def train(self, dataset):
@@ -222,6 +228,17 @@ class DigitClassificationModel(Module):
         Trains the model.
         """
         """ YOUR CODE HERE """
+        dataloader = DataLoader(dataset, batch_size = 32, shuffle = True)
+        optimizer = optim.Adam(self.parameters(), lr = 0.001)
+        for i in range(10):
+            for batch in dataloader:
+                x, label = batch['x'], batch['label']
+                optimizer.zero_grad()
+                loss = self.get_loss(x, label)
+                loss.backward()
+                optimizer.step()
+            if dataset.get_validation_accuracy() > 0.975:
+                break
 
 
 
