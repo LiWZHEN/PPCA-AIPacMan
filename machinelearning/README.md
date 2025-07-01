@@ -12,7 +12,7 @@
 本项目推荐使用 PyTorch，安装如下：
 
 ```
-conda install torch
+conda install pytorch
 ```
 
 #### PyTorch 项目提供的代码
