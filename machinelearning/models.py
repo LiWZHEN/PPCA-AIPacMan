@@ -260,7 +260,11 @@ class LanguageIDModel(Module):
         super(LanguageIDModel, self).__init__()
         "*** YOUR CODE HERE ***"
         # Initialize your model parameters here
-
+        self.hidden_dimension = 500
+        self.f1 = Linear(self.num_chars, self.hidden_dimension)
+        self.f2 = Linear(self.hidden_dimension, self.hidden_dimension)
+        self.f3 = Linear(self.hidden_dimension, 5)
+        self.relu = relu
 
     def run(self, xs):
         """
@@ -292,7 +296,12 @@ class LanguageIDModel(Module):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
-
+        L = len(xs)
+        x = self.relu(self.f1(xs[0]))
+        for i in range(1, L):
+            x = self.relu(self.f2(x) + self.f1(xs[i]))
+        x = self.f3(x)
+        return x
     
     def get_loss(self, xs, y):
         """
@@ -309,7 +318,8 @@ class LanguageIDModel(Module):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-
+        predict = self.run(xs)
+        return cross_entropy(predict, y)
 
     def train(self, dataset):
         """
@@ -326,8 +336,18 @@ class LanguageIDModel(Module):
         For more information, look at the pytorch documentation of torch.movedim()
         """
         "*** YOUR CODE HERE ***"
-
-        
+        dataLoader = DataLoader(dataset, batch_size = 32, shuffle = True)
+        optimizer = optim.Adam(self.parameters(), lr = 0.0005)
+        for i in range(20):
+            for batch in dataLoader:
+                x, label = batch['x'], batch['label']
+                xs = movedim(x, 1, 0)
+                optimizer.zero_grad()
+                loss = self.get_loss(xs, label)
+                loss.backward()
+                optimizer.step()
+            if dataset.get_validation_accuracy() >= 0.81:
+                break
 
 def Convolve(input: tensor, weight: tensor):
     """
