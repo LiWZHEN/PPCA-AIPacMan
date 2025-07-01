@@ -346,7 +346,9 @@ class DiscreteDistribution(dict):
         """
         "*** YOUR CODE HERE ***"
         total_sum = self.total()
-        if total_sum != 0:
+        if total_sum == 1:
+            pass
+        elif total_sum != 0:
             for key in self.keys():
                 self[key] /= total_sum
         "*** END YOUR CODE HERE ***"
@@ -599,7 +601,15 @@ class ExactInference(InferenceModule):
         current position is known.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        new_belief = DiscreteDistribution()
+        for oldPos in self.allPositions:
+            newPosDist = self.getPositionDistribution(gameState, oldPos)
+            for newPos, probability in newPosDist.items():
+                # if newPos not in new_belief:
+                    # new_belief[newPos] = 0
+                new_belief[newPos] += self.beliefs[oldPos] * probability
+        self.beliefs = new_belief
+        self.beliefs.normalize()
         "*** END YOUR CODE HERE ***"
 
     def getBeliefDistribution(self):
