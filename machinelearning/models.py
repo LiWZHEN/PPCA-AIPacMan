@@ -366,8 +366,12 @@ def Convolve(input: tensor, weight: tensor):
     weight_dimensions = weight.shape
     Output_Tensor = tensor(())
     "*** YOUR CODE HERE ***"
-
-    
+    output_tensor_dimensions = [input_tensor_dimensions[0] - weight_dimensions[0] + 1, input_tensor_dimensions[1] - weight_dimensions[1] + 1]
+    Output_Tensor = ones(output_tensor_dimensions)
+    for y in range(output_tensor_dimensions[0]):
+        for x in range(output_tensor_dimensions[1]):
+            sub_tensor = input[y : y + weight_dimensions[0], x : x + weight_dimensions[1]]
+            Output_Tensor[y][x] = tensordot(sub_tensor, weight)
     "*** End Code ***"
     return Output_Tensor
 
@@ -392,7 +396,7 @@ class DigitConvolutionalModel(Module):
 
         self.convolution_weights = Parameter(ones((3, 3)))
         """ YOUR CODE HERE """
-
+        self.fc = Linear(26 * 26, output_size)
 
     def run(self, x):
         """
@@ -403,7 +407,7 @@ class DigitConvolutionalModel(Module):
         x = stack(list(map(lambda sample: Convolve(sample, self.convolution_weights), x)))
         x = x.flatten(start_dim=1)
         """ YOUR CODE HERE """
-
+        return self.fc(x)
  
 
     def get_loss(self, x, y):
@@ -420,7 +424,8 @@ class DigitConvolutionalModel(Module):
         Returns: a loss tensor
         """
         """ YOUR CODE HERE """
-
+        predict = self.run(x)
+        return cross_entropy(predict, y)
         
 
     def train(self, dataset):
@@ -428,4 +433,14 @@ class DigitConvolutionalModel(Module):
         Trains the model.
         """
         """ YOUR CODE HERE """
- 
+        dataLoader = DataLoader(dataset, batch_size = 32, shuffle = True)
+        optimizer = optim.Adam(self.parameters(), lr = 0.0005)
+        for i in range(20):
+            for batch in dataLoader:
+                x, label = batch['x'], batch['label']
+                optimizer.zero_grad()
+                loss = self.get_loss(x, label)
+                loss.backward()
+                optimizer.step()
+            if dataset.get_validation_accuracy() >= 0.81:
+                break
