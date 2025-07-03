@@ -25,7 +25,7 @@ class DeepQNetwork(Module):
         # and self.batch_size!
         "*** YOUR CODE HERE ***"
         self.learning_rate = 0.1
-        self.numTrainingGames = 6000
+        self.numTrainingGames = 4000
         self.batch_size = 32
         self.fc1 = Linear(state_dim, 64)
         self.fc2 = Linear(64, 64)
